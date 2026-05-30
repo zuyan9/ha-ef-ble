@@ -874,6 +874,8 @@ _BATTERY_ADDON_SENSORS: Final = {
     "battery_{n}_cell_temperature": temperature(translation_key="cell_temperature"),
     "battery_{n}_input_power": power(precision=0, translation_key="input_power"),
     "battery_{n}_output_power": power(precision=0, translation_key="output_power"),
+    "battery_{n}_usbc_input_power": power(translation_key="usbc_input_power"),
+    "battery_{n}_usbc_output_power": power(translation_key="usbc_output_power"),
 }
 
 
