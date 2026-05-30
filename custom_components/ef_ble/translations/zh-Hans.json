@@ -532,6 +532,9 @@
       "usbc_output_power": {
         "name": "USB-C 输出功率"
       },
+      "usbc_input_power": {
+        "name": "USB-C 输入功率"
+      },
       "usbc_output_energy": {
         "name": "USB-C 输出能量"
       },

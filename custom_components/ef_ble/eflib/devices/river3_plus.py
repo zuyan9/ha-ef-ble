@@ -1,8 +1,13 @@
 from ..entity import controls
 from ..pb import pr705_pb2
-from ..props import pb_field
+from ..props import computed_field, pb_field
 from ..props.enums import IntFieldValue
-from ..props.resv_info_parser import resv_soc, resv_temperature
+from ..props.resv_info_parser import (
+    resv_is_charging,
+    resv_output_power,
+    resv_soc,
+    resv_temperature,
+)
 from . import river3
 
 pb = river3.pb
@@ -26,8 +31,27 @@ class Device(river3.Device):
     battery_1_battery_level = pb_field(pb.plug_in_info_dcp_resv, resv_soc)
     battery_1_cell_temperature = pb_field(pb.plug_in_info_dcp_resv, resv_temperature)
     battery_1_sn = pb_field(pb.plug_in_info_dcp_sn)
+    _battery_1_usbc_charging = pb_field(pb.plug_in_info_dcp_resv, resv_is_charging)
+    _battery_1_usbc_power = pb_field(pb.plug_in_info_dcp_resv, resv_output_power)
 
     led_mode = pb_field(river3.pb.led_mode, LedMode.from_value)
+
+    @computed_field
+    def battery_1_usbc_input_power(self) -> float | None:
+        return self._battery_1_usbc_power_for_direction(charging=True)
+
+    @computed_field
+    def battery_1_usbc_output_power(self) -> float | None:
+        return self._battery_1_usbc_power_for_direction(charging=False)
+
+    def _battery_1_usbc_power_for_direction(self, charging: bool) -> float | None:
+        if self._battery_1_usbc_charging is None or self._battery_1_usbc_power is None:
+            return None
+        return (
+            abs(self._battery_1_usbc_power)
+            if self._battery_1_usbc_charging is charging
+            else 0
+        )
 
     @controls.select(led_mode, options=LedMode)
     async def set_led_mode(self, state: LedMode):
