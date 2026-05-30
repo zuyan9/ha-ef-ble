@@ -13,6 +13,22 @@ from . import river3
 pb = river3.pb
 
 
+class _removed:
+    """Drop an inherited field on this model"""
+
+    def __set_name__(self, owner, name):
+        self._name = name
+        owner._fields = [f for f in owner._fields if f.public_name != name]
+        owner._computed_fields = [
+            f for f in owner._computed_fields if f.public_name != name
+        ]
+
+    def __get__(self, obj, owner):
+        if obj is None:
+            return self
+        raise AttributeError(self._name)
+
+
 class LedMode(IntFieldValue):
     OFF = 0
     DIM = 1
@@ -26,6 +42,11 @@ class Device(river3.Device):
     SN_PREFIX = (b"R631", b"R634", b"R635")
 
     battery_level_main = pb_field(river3.pb.bms_batt_soc)
+
+    # River 3 Plus (R63x) firmware does not emit these values
+    battery_input_power = _removed()
+    battery_output_power = _removed()
+    fan_running = _removed()
 
     battery_1_enabled = pb_field(pb.plug_in_info_dcp_in_flag)
     battery_1_battery_level = pb_field(pb.plug_in_info_dcp_resv, resv_soc)
